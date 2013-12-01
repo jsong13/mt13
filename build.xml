@@ -1,0 +1,36 @@
+<project name="nlp">
+
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="build/classes"/>
+        <javac 
+            includeantruntime="false"
+            srcdir="src" 
+            destdir="build/classes"
+        />
+    </target>
+
+    <target name="mt" depends="compile">
+        <java classname="nlp.project.MTTester">
+            <classpath>
+                <pathelement path="build/classes"/>
+            </classpath>
+            <arg line=
+              "-vcbsrc data-131129-final/train50k.zh.vcb
+               -vcbtrg data-131129-final/train50k.en.vcb
+               -trainsnt data-131129-final/train50k.zh_train50k.en.snt
+               -t3 data-131129-final/113-11-29.023846.admin.t3.final
+               -devsrc data-131129-final/dev10k.zh
+               -devtrg data-131129-final/dev10k.en
+               -testsrc data-131129-final/test14k.zh
+               -testtrg data-131129-final/test14k.en
+              "/>
+        </java>
+    </target>
+
+
+
+</project>
