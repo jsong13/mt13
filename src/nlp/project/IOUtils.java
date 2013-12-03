@@ -5,6 +5,69 @@ import nlp.util.*;
 
 public class IOUtils{
 
+  public static List<SentencePair<Integer>> loadWA(String path) throws IOException {
+    List<SentencePair<Integer>> ret = new ArrayList<SentencePair<Integer>>();
+    BufferedReader reader = null;
+
+    try{
+      int preStatus = 1;  // 1 for lineno, 2 for source, 3 for target, 4 for wa-st 5 for wa-ts
+      SentencePair<Integer> currentSP = null;
+      reader = new BufferedReader(new InputStreamReader(new FileInputStream(path))); 
+      String line=null;
+ 
+      while ( (line = reader.readLine()) != null ) {
+        String[] parts = line.trim().split("\\s+");
+
+        if (parts.length == 1 && parts[0].startsWith("#") 
+            && parts[0].endsWith("##") && preStatus == 5) {
+          preStatus = 1;
+          continue;
+        }
+
+        if (parts.length == 0) continue;
+
+        if (preStatus == 1) {
+          currentSP = new SentencePair<Integer>();
+          for (String a : parts) 
+            currentSP.addSrcWord(Integer.parseInt(a)); 
+          preStatus++;
+          continue;
+        }
+
+        if (preStatus == 2) {
+          for (String a : parts) 
+            currentSP.addTrgWord(Integer.parseInt(a)); 
+          ret.add(currentSP);
+          preStatus++;
+          continue;
+        }
+
+        if (preStatus == 3) {
+          for (String a: parts)
+            currentSP.addWAs2t(Integer.parseInt(a));
+          preStatus++;
+          continue;
+        }
+
+        if (preStatus == 4) {
+          for (String a: parts)
+            currentSP.addWAt2s(Integer.parseInt(a));
+          preStatus++;
+          continue;
+        }
+
+        throw new IOException();
+      }
+    } catch (Exception e) {
+      throw new IOException("Wrong wa format in " + path);
+    } finally {
+      reader.close();
+    }
+
+    return ret;
+  }
+
+    
   public static List<SentencePair<Integer>> loadSNT(String path) throws IOException {
     List<SentencePair<Integer>> ret = new ArrayList<SentencePair<Integer>>();
     BufferedReader reader = null;
@@ -22,7 +85,6 @@ public class IOUtils{
           preStatus = 1;
           continue;
         }
-
 
         if (parts.length == 0) continue;
 

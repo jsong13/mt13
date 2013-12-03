@@ -40,32 +40,38 @@ public class MTTester {
   public static void main(String[] args) throws IOException{
     Map<String, String> argMap = CommandLineUtils.simpleCommandLineParser(args);
 
-    String vcb_src_path = argMap.get("-vcbsrc");
-    String vcb_trg_path = argMap.get("-vcbtrg");
-    String train_snt_path = argMap.get("-trainsnt");
-    String t3_path = argMap.get("-t3");
-    String dev_src_path = argMap.get("-devsrc");
-    String dev_trg_path = argMap.get("-devtrg");
-    String test_src_path = argMap.get("-testsrc");
-    String test_trg_path = argMap.get("-testtrg");
+    String vcb_src_path = argMap.get("-vcb_src");
+    String vcb_trg_path = argMap.get("-vcb_trg");
+    String t3_s2t_path = argMap.get("-t3_s2t");
+    String t3_t2s_path = argMap.get("-t3_t2s");
+    String wa_path = argMap.get("-wa");
+    String dev_src_path = argMap.get("-dev_src");
+    String dev_trg_path = argMap.get("-dev_trg");
+    String test_src_path = argMap.get("-test_src");
+    String test_trg_path = argMap.get("-test_trg");
 
-    System.out.println("vcb src path\t" + vcb_src_path);
-    System.out.println("vcb trg path\t" + vcb_trg_path);
-    System.out.println("train snt path\t" + train_snt_path);
-    System.out.println("t3 path\t" + t3_path);
-    System.out.println("dev src path\t" + dev_src_path);
-    System.out.println("dev trg path\t" + dev_trg_path);
-    System.out.println("test src path\t" + test_src_path);
-    System.out.println("test trg path\t" + test_trg_path);
+    System.out.println("vcb_src path\t" + vcb_src_path);
+    System.out.println("vcb_trg path\t" + vcb_trg_path);
+    System.out.println("wa path\t" + wa_path);
+    System.out.println("t3_s2t path\t" + t3_s2t_path);
+    System.out.println("t3_t2s path\t" + t3_t2s_path);
+    System.out.println("dev_src path\t" + dev_src_path);
+    System.out.println("dev_trg path\t" + dev_trg_path);
+    System.out.println("test_src path\t" + test_src_path);
+    System.out.println("test_trg path\t" + test_trg_path);
   
     Vocabulary srcVcb = new Vocabulary(vcb_src_path);
     Vocabulary trgVcb = new Vocabulary(vcb_trg_path);
     System.out.println("vocabularies loaded!");
+
     List<SentencePair<String>> dev = IOUtils.loadParallelText(dev_src_path, dev_trg_path);
     System.out.println("dev files loaded!");
-    CounterMap<Integer, Integer> t3 = IOUtils.loadT3(t3_path);
+
+    CounterMap<Integer, Integer> t3_s2t = IOUtils.loadT3(t3_s2t_path);
+    CounterMap<Integer, Integer> t3_t2s = IOUtils.loadT3(t3_t2s_path);
     System.out.println("t3 loaded!");
-    Translator<Integer> wt = WordTranslator.buildFromT3(t3);
+
+    Translator<Integer> wt = WordTranslator.buildFromT3(t3_s2t);
 
     System.out.println("word translator built!");
     evaluate(dev, new DecodedTranslator(wt, srcVcb, trgVcb), 1000); 
