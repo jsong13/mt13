@@ -75,21 +75,15 @@ public class MTTester {
 
     // debug output for wa load result
     for (SentencePair<Integer> a : sp) {
-      if (a.wa_s2t.size() != 20) continue;
+      if (a.wa_s2t.size() != 6) continue;
       System.out.println("----------");
-      System.out.println(a.wa_s2t);
-      System.out.println(a.wa_t2s);
-      System.out.println(a.getWordAlignmentPairs());
-      for (int i = 1; i<= a.wa_s2t.size(); i++) {
-        System.out.print(i + " ");
-        System.out.println(a.getTrgPositions(i));
-      }
-
-      for (int i = 1; i<= a.wa_t2s.size(); i++) {
-        System.out.print(i + " ");
-        System.out.println(a.getSrcPositions(i));
-      }
       System.out.println(a.toStringMatrix());
+
+      PhrasePairs ap = new PhrasePairs(a);
+      for (int i=0; i < a.getSrcSentenceSize(); i++)
+        System.out.println(ap.getPairBoundsByStart(i));
+      System.out.println(PhrasePairs.treeToString(ap.getTreeL()));
+      break;
     }
 
     /*

@@ -25,8 +25,8 @@ public class SentencePair<T>{
   }
 
   // effective size in case of truncated word alignment
-  public int getSrcSentenceSize() {return wa.s2t.size();}
-  public int getTrgSentenceSize() {return wa.t2s.size();}
+  public int getSrcSentenceSize() {return wa_s2t.size();}
+  public int getTrgSentenceSize() {return wa_t2s.size();}
 
   public List<T> getSrcSentence(){ return srcSentence; }
   public List<T> getTrgSentence(){ return trgSentence; }
