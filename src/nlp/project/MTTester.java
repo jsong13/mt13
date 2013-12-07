@@ -30,7 +30,6 @@ public class MTTester {
       if (candidates.size() > limit) break;
     }
 
-
     System.out.println("BLEU 1: "+ Evaluator.bleu(candidates, references, 1));
     System.out.println("BLEU 2: "+ Evaluator.bleu(candidates, references, 2));
     System.out.println("BLEU 3: "+ Evaluator.bleu(candidates, references, 3));
@@ -64,18 +63,43 @@ public class MTTester {
     Vocabulary trgVcb = new Vocabulary(vcb_trg_path);
     System.out.println("vocabularies loaded!");
 
-    List<SentencePair<String>> dev = IOUtils.loadParallelText(dev_src_path, dev_trg_path);
+    List<SentencePair<String>> dlkfdskkkjev = IOUtils.loadParallelText(dev_src_path, dev_trg_path);
     System.out.println("dev files loaded!");
 
     CounterMap<Integer, Integer> t3_s2t = IOUtils.loadT3(t3_s2t_path);
     CounterMap<Integer, Integer> t3_t2s = IOUtils.loadT3(t3_t2s_path);
     System.out.println("t3 loaded!");
 
+    List<SentencePair<Integer>> sp = IOUtils.loadWA(wa_path);
+    System.out.println("train corpus and word alignment loaded");
+
+    // debug output for wa load result
+    for (SentencePair<Integer> a : sp) {
+      if (a.wa_s2t.size() != 20) continue;
+      System.out.println("----------");
+      System.out.println(a.wa_s2t);
+      System.out.println(a.wa_t2s);
+      System.out.println(a.getWordAlignmentPairs());
+      for (int i = 1; i<= a.wa_s2t.size(); i++) {
+        System.out.print(i + " ");
+        System.out.println(a.getTrgPositions(i));
+      }
+
+      for (int i = 1; i<= a.wa_t2s.size(); i++) {
+        System.out.print(i + " ");
+        System.out.println(a.getSrcPositions(i));
+      }
+      System.out.println(a.toStringMatrix());
+    }
+
+    /*
     Translator<Integer> wt = WordTranslator.buildFromT3(t3_s2t);
 
     System.out.println("word translator built!");
     evaluate(dev, new DecodedTranslator(wt, srcVcb, trgVcb), 1000); 
     System.out.println("evaluation done!");
+    */
     return;
   }
 }
+

@@ -10,7 +10,10 @@ public class IOUtils{
     BufferedReader reader = null;
 
     try{
-      int preStatus = 1;  // 1 for lineno, 2 for source, 3 for target, 4 for wa-st 5 for wa-ts
+      // 1 for lineno, 2 for source, 3 for target, 4 for wa-st 5 for wa-ts
+      // and we assume initially that we just finish the last record
+      int preStatus = 5;  
+
       SentencePair<Integer> currentSP = null;
       reader = new BufferedReader(new InputStreamReader(new FileInputStream(path))); 
       String line=null;
@@ -52,6 +55,8 @@ public class IOUtils{
         if (preStatus == 4) {
           for (String a: parts)
             currentSP.addWAt2s(Integer.parseInt(a));
+          
+          currentSP.finishRead();
           preStatus++;
           continue;
         }
