@@ -117,5 +117,15 @@ public class SentencePair<T>{
     return ret;
   }
 
+  public static SentencePair<String> int2string(SentencePair<Integer> sp, Vocabulary vs, Vocabulary vt) {
+    SentencePair<String> ret = new SentencePair<String>();
+    ret.wa_t2s = sp.wa_t2s;
+    ret.wa_s2t = sp.wa_s2t;
+    for (Integer i:sp.getSrcSentence())
+      ret.srcSentence.add(vs.getWord(i));
+    for (Integer i:sp.getTrgSentence())
+      ret.trgSentence.add(vt.getWord(i));
+    return ret;
+  }
 }
 
