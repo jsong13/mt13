@@ -36,4 +36,4 @@ position of a word in a sentence is counted from 1, where 0 is reserved of NULL 
 Word alignments might not cover all the way to the end of the sentences, e. g. the number of fields in line 4 migth be smaller than line 2. This is because word alignment implementation cuts off sentences if their lenths > 100.
 
 ----------
-Compile and run the MTTester using "ant mt"
+Compile and run the MTTester using "ant mt", run "SyncTreeTester" with "ant sn"

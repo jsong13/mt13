@@ -23,14 +23,12 @@ public class IOUtils{
 
         if (parts.length == 1 && parts[0].startsWith("#") 
             && parts[0].endsWith("##") && preStatus == 5) {
+          currentSP = new SentencePair<Integer>();
           preStatus = 1;
           continue;
         }
 
-        if (parts.length == 0) continue;
-
         if (preStatus == 1) {
-          currentSP = new SentencePair<Integer>();
           for (String a : parts) 
             currentSP.addSrcWord(Integer.parseInt(a)); 
           preStatus++;
@@ -40,7 +38,6 @@ public class IOUtils{
         if (preStatus == 2) {
           for (String a : parts) 
             currentSP.addTrgWord(Integer.parseInt(a)); 
-          ret.add(currentSP);
           preStatus++;
           continue;
         }
@@ -57,6 +54,8 @@ public class IOUtils{
             currentSP.addWAt2s(Integer.parseInt(a));
           
           currentSP.finishRead();
+          ret.add(currentSP);
+          currentSP = null;
           preStatus++;
           continue;
         }
