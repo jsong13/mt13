@@ -4,36 +4,18 @@ import java.io.*;
 import java.util.*;
 import nlp.project.*;
 import nlp.util.*;
+import nlp.ling.Tree;
 
-public class MTTester {
-  public static void evaluate(List<SentencePair<String>> sps, Translator<String> translator, int limit) {
-    List<List<String>> candidates = new ArrayList<List<String>>();
-    List<List<String>> references = new ArrayList<List<String>>();
-    for (SentencePair<String> sp : sps) {
+public class SyncTreeTester {
+  static public <A> String indentTree(Tree<A> t){
+    return indentTreeHelper(t, "   ", "");
+  }
 
-      List<String> c = translator.translate(sp.getSrcSentence());
-      candidates.add(c);
-      references.add(sp.getTrgSentence());
-
-      
-      // verbose
-      if (true) {
-        System.out.println("---" + candidates.size()+"---");
-        for (String s :sp.getSrcSentence() ) System.out.print(s+" ");
-        System.out.println("");
-        for (String s :sp.getTrgSentence() ) System.out.print(s+" ");
-        System.out.println("");
-        for (String s : c ) System.out.print(s+" ");
-        System.out.println("");
-      }
-      
-      if (candidates.size() > limit) break;
-    }
-
-    System.out.println("BLEU 1: "+ Evaluator.bleu(candidates, references, 1));
-    System.out.println("BLEU 2: "+ Evaluator.bleu(candidates, references, 2));
-    System.out.println("BLEU 3: "+ Evaluator.bleu(candidates, references, 3));
-    System.out.println("BLEU 4: "+ Evaluator.bleu(candidates, references, 4));
+  static private <A> String indentTreeHelper(Tree<A> t, String indent, String pre) {
+    String ret = pre + t.getLabel().toString() + "\n";
+    for (Tree<A> c : t.getChildren())
+      ret += indentTreeHelper(c, indent, pre+indent); 
+    return ret;
   }
 
   public static void main(String[] args) throws IOException{
@@ -73,13 +55,29 @@ public class MTTester {
     List<SentencePair<Integer>> sp = IOUtils.loadWA(wa_path);
     System.out.println("train corpus and word alignment loaded");
 
-    /*
-    Translator<Integer> wt = WordTranslator.buildFromT3(t3_s2t);
+    // debug output for wa load result
+    if (false) {
+    for (SentencePair<Integer> a1 : sp) {
+      SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
+      if (a.wa_s2t.size() != 8) continue;
+      System.out.println("----------");
+      System.out.println(a.toStringMatrix());
+      PhrasePairs ap = new PhrasePairs(a);
 
-    System.out.println("word translator built!");
-    evaluate(dev, new DecodedTranslator(wt, srcVcb, trgVcb), 1000); 
-    System.out.println("evaluation done!");
-    */
+
+      System.out.println(indentTree(ap.getTreeL()));
+      System.out.println(indentTree(ap.buildSyncTree()));
+      //System.out.println(indentTree(SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
+      System.out.println((SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
+    }}
+
+    if (true) {
+    for (SentencePair<Integer> a1 : sp) {
+      SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
+      PhrasePairs ap = new PhrasePairs(a);
+      System.out.println((SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
+    }}
+
     return;
   }
 }
