@@ -7,6 +7,7 @@ import nlp.util.Pair;
 import nlp.ling.Tree;
 
 // deal with phrase pairs in a sentence
+// output a Synchronisze Tree
 class PhrasePairs<T> {
   SentencePair<T> sentencePair;
   public PhrasePairs(SentencePair<T> sp) { 
@@ -30,6 +31,9 @@ class PhrasePairs<T> {
     public int getsstart(){return sstart;}
     public int getsend(){return send;}
     public int getssize(){return send-sstart;}
+    public int gettstart(){return tstart;}
+    public int gettend(){return tend;}
+    public int gettsize(){return tend-tstart;}
 
     public String toString(){
       return String.format("(%d %d, %d %d)", sstart+1, send+1, tstart+1, tend+1);
@@ -117,20 +121,6 @@ class PhrasePairs<T> {
     }
   }
 
-  // show the tree nicely for debug
-  public static String treeToString(Tree<PairBound> t){
-    return treeToStringHelper(t, "  ", "");
-  }
-
-  private static String treeToStringHelper(Tree<PairBound> t, String indent, String pre){
-    String ret = "";
-    ret += (pre + t.getLabel().toString() + "\n");
-    for (Tree<PairBound> c: t.getChildren()) {
-      ret += treeToStringHelper(c, indent, pre+indent);
-    }
-    return ret;
-  }
-
   public Tree<PairBound> getTreeL(){
     // locate the largest phrase pair in the sentence
     // there is one and only one largest pair
@@ -145,11 +135,11 @@ class PhrasePairs<T> {
     return ret;
   }
 
-  // make a tree under the node
+  // helper make a tree with one phrase-pair
+  // pick out the (left, longest) sub phrase pairs
   private Tree<PairBound> getTreeLHelper(PairBound parent) {
     List<PairBound> children = new ArrayList<PairBound>();
 
-    System.out.println("Tree node " + parent);
     int i = parent.getsstart();
     while (i<=parent.getsend()){
       List<PairBound> candidates = getPairBoundsByStart(i);
@@ -163,7 +153,6 @@ class PhrasePairs<T> {
       }
       i++;
     }
-    
 
     if (children.isEmpty()) {
       return new Tree<PairBound>(parent);
@@ -174,5 +163,78 @@ class PhrasePairs<T> {
       }
       return new Tree<PairBound>(parent, childrenTree);
     }
+  }
+
+
+  // transform a pairbound tree into a synchronized tree
+  Tree<SyncNode> expandToSyncTree(Tree<PairBound> tpb) {
+    if (tpb == null) return null;
+    List<Tree<SyncNode>> newchildren = new ArrayList<Tree<SyncNode>>();
+    SyncNode<T> ret = new SyncNode();
+
+    PairBound pb = tpb.getLabel();
+    int ss = pb.getsstart();
+    int se = pb.getsend();
+    int ts = pb.gettstart();
+    int te = pb.gettend();
+    Map<Integer, Integer> sourcemark = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> targetmark = new HashMap<Integer, Integer>();
+
+    for (int i=ss; i<=se; i++) sourcemark.put(i, -1);
+    for (int i=ts; i<=te; i++) targetmark.put(i, -1);
+
+    for(int i = 0; i<tpb.getChildren().size(); i++) {
+      PairBound cpb = tpb.getChildren().get(i).getLabel();
+      for (int j = cpb.getsstart(); j<=cpb.getsend(); j++)  sourcemark.put(j, i);
+      for (int j = cpb.gettstart(); j<=cpb.gettend(); j++) targetmark.put(j, i);
+    }
+
+    int premark = -1;
+    List<T> padding = new ArrayList<T>();
+    for (int cs=ss; cs<=se; cs++){
+      int cmark = sourcemark.get(cs);
+      if (cmark == -1) {
+        padding.add(sentencePair.getSrcSentence().get(cs));
+        premark = cmark;
+        continue;
+      } 
+      if (premark != cmark) {
+        ret.paddingSrc.add(padding);
+        padding = new ArrayList<T>();
+        premark = cmark;
+        continue;
+      }
+    }
+    ret.paddingSrc.add(padding);
+
+    premark = -1;
+    padding = new ArrayList<T>();
+    for (int cs=ts; cs<=te; cs++){
+      int cmark = targetmark.get(cs);
+      if (cmark == -1) {
+        padding.add(sentencePair.getTrgSentence().get(cs));
+        premark = cmark;
+        continue;
+      } 
+      if (premark != cmark) {
+        ret.ordert2s.add(cmark);
+        ret.paddingTrg.add(padding);
+        padding = new ArrayList<T>();
+        premark = cmark;
+        continue;
+      }
+    }
+    ret.paddingTrg.add(padding);
+    
+
+    for(Tree<PairBound> ctpb : tpb.getChildren()) {
+      newchildren.add(expandToSyncTree(ctpb));
+    }
+    return new Tree<SyncNode>(ret, newchildren);
+  }
+
+  // for convenience
+  public Tree<SyncNode> buildSyncTree(){
+    return expandToSyncTree(getTreeL());
   }
 }
