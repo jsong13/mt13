@@ -1,9 +1,7 @@
 <project name="nlp">
-
     <target name="clean">
         <delete dir="build"/>
     </target>
-
     <target name="compile">
         <mkdir dir="build/classes"/>
         <javac 
@@ -12,9 +10,26 @@
             destdir="build/classes"
         />
     </target>
-
     <target name="mt" depends="compile">
         <java classname="nlp.project.MTTester">
+            <classpath>
+                <pathelement path="build/classes"/>
+            </classpath>
+            <arg line=
+              "-vcb_src data/train50k.zh.vcb
+               -vcb_trg data/train50k.en.vcb
+               -wa data/train50k.wa
+			   -t3_s2t data/train50k.zh_en.t3
+               -t3_t2s data/train50k.en_zh.t3
+               -dev_src data/dev10k.zh
+               -dev_trg data/dev10k.en
+               -test_src data/test14k.zh
+               -test_trg data/test14k.en
+              "/>
+        </java>
+    </target>
+    <target name="sn" depends="compile">
+        <java classname="nlp.project.SyncTreeTester">
             <classpath>
                 <pathelement path="build/classes"/>
             </classpath>
