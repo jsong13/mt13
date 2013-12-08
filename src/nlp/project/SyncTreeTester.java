@@ -53,29 +53,44 @@ public class SyncTreeTester {
     System.out.println("t3 loaded!");
 
     List<SentencePair<Integer>> sp = IOUtils.loadWA(wa_path);
-    System.out.println("train corpus and word alignment loaded");
+    System.out.println("wa loaded");
 
     // debug output for wa load result
+    int sentenceNo = 0;
     if (false) {
     for (SentencePair<Integer> a1 : sp) {
+      sentenceNo++;
+      if (sentenceNo != 45634) continue;
       SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
-      if (a.wa_s2t.size() != 8) continue;
       System.out.println("----------");
+      System.out.println(a.srcSentence);
+      System.out.println(a.trgSentence);
       System.out.println(a.toStringMatrix());
       PhrasePairs ap = new PhrasePairs(a);
 
-
       System.out.println(indentTree(ap.getTreeL()));
       System.out.println(indentTree(ap.buildSyncTree()));
-      //System.out.println(indentTree(SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
+      System.out.println(indentTree(SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
       System.out.println((SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
     }}
 
+    sentenceNo = 0;
     if (true) {
     for (SentencePair<Integer> a1 : sp) {
+      sentenceNo++;
+      //System.out.println("#"+sentenceNo+"##");
+      if (a1.getSrcSentenceSize() > 40 || a1.getSrcSentenceSize() <= 5 ) {
+        System.out.println(String.format("(S TooLong%d)", a1.getSrcSentenceSize()));
+        continue;
+      }
       SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
       PhrasePairs ap = new PhrasePairs(a);
+
+      //System.out.println(a.getSrcSentence());
+      //System.out.println(ap.buildSyncTree()==null);
+      //System.out.println(ap.buildSyncTree());
       System.out.println((SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
+      if(sentenceNo%1000==0) System.gc();
     }}
 
     return;

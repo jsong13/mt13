@@ -14,23 +14,48 @@ public class SentencePair<T>{
   List<Integer> wa_s2t = new ArrayList<Integer>();
   List<Integer> wa_t2s = new ArrayList<Integer>();
 
+  // effective sentence size
+  int  srcLength=-1;
+  int  trgLength=-1;
+
   // read data sequentially from elsewhere
   public void addSrcWord(T i){ srcSentence.add(i); }
   public void addTrgWord(T i){ trgSentence.add(i); }
   public void addWAs2t(int j) { wa_s2t.add(j);}
   public void addWAt2s(int i) { wa_t2s.add(i);}
   
-  // cut the sentence if too long
+  // fix broken or truncated alignments
   public void finishRead(){
+    srcLength = wa_s2t.size();
+    trgLength = wa_t2s.size();
+
+    // alignments out of bound
+    for (int i=0; i<wa_s2t.size(); i++){
+      if (wa_s2t.get(i) < 0 || wa_s2t.get(i) > trgSentence.size()) {
+        wa_s2t.set(i, 0);
+      }
+    }
+    for (int i=0; i<wa_t2s.size(); i++){
+      if (wa_t2s.get(i) < 0 || wa_t2s.get(i) > srcSentence.size()) {
+        wa_t2s.set(i, 0);
+      }
+    }
+    for (int i:wa_t2s) srcLength = (i > srcLength) ? i : srcLength;
+    for (int i:wa_s2t) trgLength = (i > trgLength) ? i : trgLength;
+    
+    int s1 = wa_s2t.size();
+    for (int j=0; j<srcLength-s1; j++) wa_s2t.add(0);
+    int s2 = wa_t2s.size();
+    for (int j=0; j<trgLength-s2; j++) wa_t2s.add(0);
   }
 
   // effective size in case of truncated word alignment
-  public int getSrcSentenceSize() {return wa_s2t.size();}
-  public int getTrgSentenceSize() {return wa_t2s.size();}
+  public int getSrcSentenceSize() { return srcLength; }
+  public int getTrgSentenceSize() { return trgLength; }
 
   public List<T> getSrcSentence(){ return srcSentence; }
   public List<T> getTrgSentence(){ return trgSentence; }
-  
+
   // return an unordered list word alignment tuples
   public List<Pair<Integer, Integer>> getWordAlignmentPairs(){
     List<Pair<Integer, Integer>> ret = new ArrayList<Pair<Integer,Integer>>(); 
@@ -102,11 +127,11 @@ public class SentencePair<T>{
   public String toStringMatrix(){
     String ret = "";
     ret += "    ";
-    for (int i=0; i<wa_s2t.size(); i++) {
+    for (int i=0; i<getSrcSentenceSize(); i++) {
       ret += String.format(" %02d", i+1);
     }
     ret +="\n";
-    for (int j=0; j<wa_t2s.size(); j++) {
+    for (int j=0; j<getTrgSentenceSize(); j++) {
       ret += String.format("%02d  ", j+1);
       for (int i=0; i<wa_s2t.size(); i++){
         if (wa_s2t.get(i) == j+1 || wa_t2s.get(j)== i+1) ret += " x ";
@@ -125,6 +150,7 @@ public class SentencePair<T>{
       ret.srcSentence.add(vs.getWord(i));
     for (Integer i:sp.getTrgSentence())
       ret.trgSentence.add(vt.getWord(i));
+    ret.finishRead();
     return ret;
   }
 }

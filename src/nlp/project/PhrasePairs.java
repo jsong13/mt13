@@ -15,11 +15,11 @@ class PhrasePairs<T> {
     extract();
   }
 
-  private int[][] Ls2t = null;
-  private int[][] Us2t = null;
-  private int[][] Lt2s = null;
-  private int[][] Ut2s = null;
-  private List<List<PairBound>> PBatSS = null;
+  int[][] Ls2t = null;
+  int[][] Us2t = null;
+  int[][] Lt2s = null;
+  int[][] Ut2s = null;
+  List<List<PairBound>> PBatSS = null;
  
   static class PairBound {
     int sstart = -1;
