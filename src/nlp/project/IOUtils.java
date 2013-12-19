@@ -1,7 +1,11 @@
 package nlp.project;
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import nlp.util.*;
+import nlp.ling.*;
+
 
 public class IOUtils{
 
@@ -172,4 +176,66 @@ public class IOUtils{
     return ret;
   }
 
+  // LP for left parenthesis and RP for right parenthesis
+  // both can string, tree node are separted by space
+  // assuming all the labels and LP and RP do not have spaces 
+  // choose LP and RP carefully to avoid labels in tree node.
+  // NOTE: Leaf node are in LP and RP too, because some labels can be empty
+
+  public static <T> String treeToString(Tree<T> tree, String LP, String RP) {
+    String ret = "";
+    ret += LP+ " ";
+    ret += tree.getLabel().toString() + " ";
+    for (Tree<T> c : tree.getChildren()) {
+      ret += treeToString(c, LP, RP) + " ";
+    }
+    ret += RP;
+    return ret;
+  }
+
+  // see above
+  static public Tree<String> stringToTree(String line, String LP, String RP) {
+    String[] parts = line.trim().split("\\s+");    
+    Tree<String> ret = null;
+    Stack<Tree<String>> parents = new Stack<Tree<String>>();
+    for (String word : parts) {
+      Tree<String> parent = null;
+
+      if (!parents.empty()) parent = parents.peek();
+
+      if (word.equals(LP)) {
+        Tree<String> tr = new Tree<String>("");
+        if (parent!=null) {
+          // add tr to the current parent, stupid Tree doesn't have addChild API!
+          List<Tree<String>> children = parent.getChildren();
+          List<Tree<String>> newChildren = new ArrayList<Tree<String>>(children);
+          newChildren.add(tr);
+          parent.setChildren(newChildren);
+        }
+        parents.push(tr);
+        continue;
+      } 
+       
+      if (word.equals(RP)) {
+        ret = parents.pop();
+        continue;
+      }
+      
+      parent.setLabel(word);
+    }
+    return ret;
+  }
+
+  static public List<Tree<String>> readTreesFromFile(String path, String LP, String RP) throws IOException {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path),"UTF-8")); 
+    List<Tree<String>> ret = new ArrayList<Tree<String>>();
+    while (true) {
+      String line = reader.readLine();
+      if (line == null) break;
+      if (!line.trim().startsWith(LP)) continue;
+      ret.add(stringToTree(line, LP, RP));
+    }
+    return ret;
+  }
 }
+
