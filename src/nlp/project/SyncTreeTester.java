@@ -19,7 +19,7 @@ public class SyncTreeTester {
   }
 
 
-  public static void main(String[] args) throws IOException{
+  public static void main(String[] args) throws Exception{
     Map<String, String> argMap = CommandLineUtils.simpleCommandLineParser(args);
 
     String vcb_src_path = argMap.get("-vcb_src");
@@ -32,6 +32,8 @@ public class SyncTreeTester {
     String test_src_path = argMap.get("-test_src");
     String test_trg_path = argMap.get("-test_trg");
 
+    String train_tree_src_path = argMap.get("-train_tree_src");
+
     System.out.println("vcb_src path\t" + vcb_src_path);
     System.out.println("vcb_trg path\t" + vcb_trg_path);
     System.out.println("wa path\t" + wa_path);
@@ -41,6 +43,7 @@ public class SyncTreeTester {
     System.out.println("dev_trg path\t" + dev_trg_path);
     System.out.println("test_src path\t" + test_src_path);
     System.out.println("test_trg path\t" + test_trg_path);
+    System.out.println("train_tree_src path\t" + train_tree_src_path);
   
     Vocabulary srcVcb = new Vocabulary(vcb_src_path);
     Vocabulary trgVcb = new Vocabulary(vcb_trg_path);
@@ -91,14 +94,19 @@ public class SyncTreeTester {
       //System.out.println(a.getSrcSentence());
       //System.out.println(ap.buildSyncTree()==null);
       //System.out.println(ap.buildSyncTree());
-      System.out.println((SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
+      Tree<String> srcTree = SyncTrees.reduce2Src(ap.buildSyncTree(), "S");
+      String line = IOUtils.treeToString(srcTree, "\u2514", "\u2510" );
+      Tree<String> back = IOUtils.stringToTree(line, "\u2514", "\u2510");
+
+      System.out.println(line);
+
       if(sentenceNo%1000==0) System.gc();
     }}
 
 
     // output fro all sync nodes
     sentenceNo = 0;
-    if (true) {
+    if (false) {
     for (SentencePair<Integer> a1 : sp) {
       sentenceNo++;
       if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
@@ -107,11 +115,37 @@ public class SyncTreeTester {
       SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
       PhrasePairs ap = new PhrasePairs(a);
       System.out.println(indentTree( ap.buildSyncTree()));  
+
+      if(sentenceNo%1000==0) System.gc();
+      
+
       if(sentenceNo%1000==0) System.gc();
     }}
 
 
+    // output fro all sync nodes
+    sentenceNo = 0;
+    if (false) {
+    for (SentencePair<Integer> a1 : sp) {
+      sentenceNo++;
+      if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
+        continue;
+      }
+      SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
+      PhrasePairs ap = new PhrasePairs(a);
+      System.out.println(indentTree( ap.buildSyncTree()));  
 
+      if(sentenceNo%1000==0) System.gc();
+    }}
+
+    
+    // testing readTreesFromFile
+    if (true) {
+      List<Tree<String>> trainTrees = IOUtils.readTreesFromFile(train_tree_src_path, "\u2514", "\u2510"); 
+      for (Tree<String> tr : trainTrees) {
+        System.out.println(tr);
+      }
+    }
     return;
   }
 }
