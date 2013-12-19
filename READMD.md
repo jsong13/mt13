@@ -38,5 +38,7 @@ Word alignments might not cover all the way to the end of the sentences, e. g. t
 ----------
 Compile and run the MTTester using "ant mt", run "SyncTreeTester" with "ant sn"
 
-train50k.en.{1,2}.mrg source side trees using sentences between 5 and 60
+---
+trees with LP="\u2514" and RP="\u2510"
+use IOUtils.readTreeFromFile(filename, LP, RP) to read train50k.zh.0.mrg
 
