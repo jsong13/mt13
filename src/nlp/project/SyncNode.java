@@ -29,26 +29,39 @@ class SyncNode<T>{
 
   // dump for debug
   public String toString(){
-    String ret = "<X|";
-    
+    String ret = "";
+
+    ret += toSourceString();
+    ret += "|"; 
+    ret += toTargetString();
+ 
+    return ret;
+  }
+
+  public String toSourceString(){
+    String ret = "";
     int i=0;
     for (List<T> pads : paddingSrc) {
       for (T p : pads) ret += (" "+p);
       if (i<ordert2s.size())
-        ret += " "+String.format("X%d", i+1);
+        ret += " "+String.format("_X_%d", i+1);
       i++;
     }
-    ret += "|"; 
-    i=0;
+    ret = ret.replaceAll("\\s+", " ").trim();
+    return ret;
+  }
+
+  public String toTargetString(){
+    String ret = "";
+    int i=0;
     for (List<T> pads : paddingTrg) {
       for (T p : pads) ret += " "+p;
       if (i<ordert2s.size())
-        ret += " "+String.format("X%d", ordert2s.get(i)+1);
+        ret += " "+String.format("_X_%d", ordert2s.get(i)+1);
       i++;
     }
-    ret += ">";
- 
-    ret = ret.replaceAll("\\s+", " ");
+    ret = ret.replaceAll("\\s+", " ").trim();
     return ret;
   }
+
 }

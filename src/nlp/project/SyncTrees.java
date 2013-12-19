@@ -28,4 +28,16 @@ class SyncTrees {
       ret.setChildren(newchildren);
     return ret;
   }
+  
+  
+  // transverse tranveral of tree except leaf
+  public static List<T> explodeTree(Tree<T> root) {
+    List<T> ret = new ArrayList(); 
+    explodeTreeHelper(root, ret); 
+    return ret;
+  }
+  
+  private static void explodeTreeHelper(Tree<T> root, List<T> ret) {
+    if root.isLeaf() 
+  }
 }

@@ -8,7 +8,7 @@ import nlp.ling.Tree;
 
 public class SyncTreeTester {
   static public <A> String indentTree(Tree<A> t){
-    return indentTreeHelper(t, "   ", "");
+    return indentTreeHelper(t, "", "");
   }
 
   static private <A> String indentTreeHelper(Tree<A> t, String indent, String pre) {
@@ -17,6 +17,7 @@ public class SyncTreeTester {
       ret += indentTreeHelper(c, indent, pre+indent); 
     return ret;
   }
+
 
   public static void main(String[] args) throws IOException{
     Map<String, String> argMap = CommandLineUtils.simpleCommandLineParser(args);
@@ -60,7 +61,7 @@ public class SyncTreeTester {
     if (false) {
     for (SentencePair<Integer> a1 : sp) {
       sentenceNo++;
-      if (sentenceNo != 45634) continue;
+      if (sentenceNo != 47328) continue;
       SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
       System.out.println("----------");
       System.out.println(a.srcSentence);
@@ -74,12 +75,13 @@ public class SyncTreeTester {
       System.out.println((SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
     }}
 
+    // output for treebanks
     sentenceNo = 0;
-    if (true) {
+    if (false) {
     for (SentencePair<Integer> a1 : sp) {
       sentenceNo++;
       //System.out.println("#"+sentenceNo+"##");
-      if (a1.getSrcSentenceSize() > 40 || a1.getSrcSentenceSize() <= 5 ) {
+      if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
         System.out.println(String.format("(S TooLong%d)", a1.getSrcSentenceSize()));
         continue;
       }
@@ -92,6 +94,23 @@ public class SyncTreeTester {
       System.out.println((SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
       if(sentenceNo%1000==0) System.gc();
     }}
+
+
+    // output fro all sync nodes
+    sentenceNo = 0;
+    if (true) {
+    for (SentencePair<Integer> a1 : sp) {
+      sentenceNo++;
+      if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
+        continue;
+      }
+      SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
+      PhrasePairs ap = new PhrasePairs(a);
+      System.out.println(indentTree( ap.buildSyncTree()));  
+      if(sentenceNo%1000==0) System.gc();
+    }}
+
+
 
     return;
   }
