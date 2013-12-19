@@ -21,6 +21,7 @@ class PhrasePairs<T> {
   int[][] Ut2s = null;
   List<List<PairBound>> PBatSS = null;
  
+  // end size is not included
   static class PairBound {
     int sstart = -1;
     int send = -1;
@@ -145,7 +146,7 @@ class PhrasePairs<T> {
       List<PairBound> candidates = getPairBoundsByStart(i);
       if (candidates.isEmpty()) { i++; continue;}
       for (int j = candidates.size()-1; j>=0; j--) {
-        if (candidates.get(j).getssize() < parent.getssize()) {
+        if (candidates.get(j).getsend() < parent.getsend()) {
           children.add(candidates.get(j));
           i = candidates.get(j).getsend();
           break; // to the end of while body
