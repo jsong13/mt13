@@ -112,19 +112,21 @@ public class SyncTreeTester {
     sentenceNo = 0;
     if (true) {
 
-    SyncGrammar<String> syncGrammar = new SyncGrammar();
-    for (SentencePair<Integer> a1 : sp) {
-      sentenceNo++;
-      if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
-        continue;
-      }
-      SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
-      PhrasePairs ap = new PhrasePairs(a);
-      Tree<SyncNode<String>> syncTree = ap.buildSyncTree();
-      syncGrammar.increment(syncTree);
+      SyncGrammar<String> syncGrammar = new SyncGrammar();
+      for (SentencePair<Integer> a1 : sp) {
+        sentenceNo++;
+        if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
+          continue;
+        }
+        SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
+        PhrasePairs ap = new PhrasePairs(a);
+        Tree<SyncNode<String>> syncTree = ap.buildSyncTree();
+        syncGrammar.increment(syncTree);
 
-      if(sentenceNo%1000==0) System.gc();
-    }}
+        if(sentenceNo%1000==0) System.gc();
+      }
+
+    }
 
 
     /////////////////////////////////
