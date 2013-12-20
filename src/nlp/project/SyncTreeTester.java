@@ -59,6 +59,7 @@ public class SyncTreeTester {
     List<SentencePair<Integer>> sp = IOUtils.loadWA(wa_path);
     System.out.println("wa loaded");
 
+    /////////////////////////////////
     // debug output for wa load result
     int sentenceNo = 0;
     if (false) {
@@ -78,7 +79,8 @@ public class SyncTreeTester {
       System.out.println((SyncTrees.reduce2Src(ap.buildSyncTree(), "S")));
     }}
 
-    // output for treebanks
+    /////////////////////////////////
+    // output for treebanks mrg file
     sentenceNo = 0;
     if (false) {
     for (SentencePair<Integer> a1 : sp) {
@@ -104,48 +106,38 @@ public class SyncTreeTester {
     }}
 
 
+    /////////////////////////////////
     // output fro all sync nodes
+    // check toString and load back using constructor
     sentenceNo = 0;
-    if (false) {
-    for (SentencePair<Integer> a1 : sp) {
-      sentenceNo++;
-      if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
-        continue;
-      }
-      SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
-      PhrasePairs ap = new PhrasePairs(a);
-      System.out.println(indentTree( ap.buildSyncTree()));  
-
-      if(sentenceNo%1000==0) System.gc();
-      
-
-      if(sentenceNo%1000==0) System.gc();
-    }}
-
-
-    // output fro all sync nodes
-    sentenceNo = 0;
-    if (false) {
-    for (SentencePair<Integer> a1 : sp) {
-      sentenceNo++;
-      if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
-        continue;
-      }
-      SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
-      PhrasePairs ap = new PhrasePairs(a);
-      System.out.println(indentTree( ap.buildSyncTree()));  
-
-      if(sentenceNo%1000==0) System.gc();
-    }}
-
-    
-    // testing readTreesFromFile
     if (true) {
+
+    SyncGrammar<String> syncGrammar = new SyncGrammar();
+    for (SentencePair<Integer> a1 : sp) {
+      sentenceNo++;
+      if (a1.getSrcSentenceSize() > 60 || a1.getSrcSentenceSize() <= 5 ) {
+        continue;
+      }
+      SentencePair<String> a = SentencePair.int2string(a1, srcVcb, trgVcb);
+      PhrasePairs ap = new PhrasePairs(a);
+      Tree<SyncNode<String>> syncTree = ap.buildSyncTree();
+      syncGrammar.increment(syncTree);
+
+      if(sentenceNo%1000==0) System.gc();
+    }}
+
+
+    /////////////////////////////////
+    // testing readTreesFromFile
+    if (false) {
       List<Tree<String>> trainTrees = IOUtils.readTreesFromFile(train_tree_src_path, "\u2514", "\u2510"); 
       for (Tree<String> tr : trainTrees) {
         System.out.println(tr);
       }
     }
+
+
+
     return;
   }
 }
