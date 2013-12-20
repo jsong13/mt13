@@ -32,12 +32,13 @@ class SyncNode<T>{
   public int numNonTerminals(){return ordert2s.size();}
 
   public String toString(){
-    String ret = "";
+    String ret = "<";
 
     ret += toSrcString();
     ret += "|"; 
     ret += toTrgString();
  
+    ret += ">";
     return ret;
   }
 

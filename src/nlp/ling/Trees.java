@@ -26,8 +26,11 @@ public class Trees {
 		String transformedLabel = tree.getLabel();
 	      int cutIndex = transformedLabel.indexOf('-');
 	      int cutIndex2 = transformedLabel.indexOf('=');
+	      int cutIndex3 = transformedLabel.indexOf('^');
 	      if (cutIndex2 > 0 && (cutIndex2 < cutIndex || cutIndex == -1))
 	        cutIndex = cutIndex2;
+	      if (cutIndex3 < cutIndex && cutIndex3 > 0 || cutIndex == -1)
+	    	cutIndex = cutIndex3;
 	      if (cutIndex > 0 && ! tree.isLeaf()) {
 	        transformedLabel = new String(transformedLabel.substring(0,cutIndex));
 	      }
@@ -176,16 +179,16 @@ public class Trees {
       try {
         readWhiteSpace();
         if (!isLeftParen(peek())) return null;
-        return readTree(true);
+        return readTree();
       } catch (IOException e) {
         throw new RuntimeException("Error reading tree.");
       }
     }
 
-    private Tree<String> readTree(boolean isRoot) throws IOException {
+    private Tree<String> readTree() throws IOException {
       readLeftParen();
       String label = readLabel();
-      if (label.length() == 0 && isRoot) label = ROOT_LABEL;
+//      if (label.length() == 0 && isRoot) label = ROOT_LABEL;
       List<Tree<String>> children = readChildren();
       readRightParen();
       return new Tree<String>(label, children);
@@ -208,11 +211,28 @@ public class Trees {
       return sb.toString().intern();
     }
 
+//    private List<Tree<String>> readChildren() throws IOException {
+//        readWhiteSpace();
+//        if (!isLeftParen(peek()))
+//          return Collections.singletonList(readLeaf());
+//        return readChildList();
+//      }
+    
     private List<Tree<String>> readChildren() throws IOException {
-      readWhiteSpace();
-      if (!isLeftParen(peek()))
-        return Collections.singletonList(readLeaf());
-      return readChildList();
+        readWhiteSpace();
+        List<Tree<String>> children = new ArrayList<Tree<String>>();
+        Tree<String> child;
+        while (!isRightParen(peek())){
+            readWhiteSpace();
+            if (!isLeftParen(peek())){
+            	child = readLeaf();
+            }
+            else {
+            	child = readTree();
+            }
+            children.add(child);
+        }
+        return children;
     }
 
     private int peek() throws IOException {
@@ -230,7 +250,7 @@ public class Trees {
       List<Tree<String>> children = new ArrayList<Tree<String>>();
       readWhiteSpace();
       while (!isRightParen(peek())) {
-        children.add(readTree(false));
+        children.add(readTree());
         readWhiteSpace();
       }
       return children;
@@ -368,7 +388,10 @@ public class Trees {
   }
 
   public static void main(String[] args) {
-    PennTreeReader reader = new PennTreeReader(new StringReader("((S (NP (DT the) (JJ quick) (JJ brown) (NN fox)) (VP (VBD jumped) (PP (IN over) (NP (DT the) (JJ lazy) (NN dog)))) (. .)))"));
+//	PennTreeReader reader = new PennTreeReader(new StringReader("(S 第 (S (S (S 59) (S /)) (S 99)) 号 决议)"));
+	PennTreeReader reader = new PennTreeReader(new StringReader("(S (S (S 2004 年 12 月 (S 10) 日) 第 (S (S (S 59) /) 121) 号 决议 (S (S ，) 以及) (S (S 人权) 委员会) 决议)"));
+
+//    PennTreeReader reader = new PennTreeReader(new StringReader("((S (NP (DT the) (JJ quick) (JJ brown) (NN fox)) (VP (VBD jumped) (PP (IN over) (NP (DT the) (JJ lazy) (NN dog)))) (. .)))"));
     Tree<String> tree = reader.next();
     System.out.println(PennTreeRenderer.render(tree));
     System.out.println(tree);

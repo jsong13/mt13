@@ -87,8 +87,14 @@ public class Indexer <E> extends AbstractList<E> implements Serializable {
     indexes = new HashMap<E, Integer>();
   }
   
+  public Indexer(int size) {
+    objects = new ArrayList<E>(size);
+    indexes = new HashMap<E, Integer>();
+  }
+  
+  
   public Indexer(Collection<? extends E> c) {
-    this();
+    this(c.size());
     addAll(c);
   }
 }
