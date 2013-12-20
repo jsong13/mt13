@@ -79,9 +79,6 @@ public class CKYParserK implements Parser{
 					bestK.add(new Trace(unaryRule.score, 0, null, unaryRule));
 				}
 				score[i][i+1].put(unaryRule.parent, bestK);
-//				score[i][i+1].put(unaryRule.parent, unaryRule.score);
-//				int[] trace = {indexer.indexOf(unaryRule.child)}; // the size of trace is 1 if it is a unary rule;
-//				back[i][i+1].put(unaryRule.parent, trace);
 			}
 		}
 
@@ -103,16 +100,16 @@ public class CKYParserK implements Parser{
 						for (int k = i+1; k < j; k++){
 								// set score by binary rule
 //									if (score[i][k] != null && score[k][j] != null){
-										List<Trace> leftBestK = score[i][k].get(leftChild);
-										List<Trace> rightBestK = score[k][j].get(rightChild);
-										if (leftBestK != null && rightBestK != null){
-											double prob = leftBestK.get(0).score * rightBestK.get(0).score * binaryRule.getScore();
-											Trace trace = new Trace(prob, k, binaryRule, null);
-											trace.leftRank = 0;
-											trace.rightRank = 0;
-											maxHeap.add(trace);
-										}
+							List<Trace> leftBestK = score[i][k].get(leftChild);
+							List<Trace> rightBestK = score[k][j].get(rightChild);
+							if (leftBestK != null && rightBestK != null){
+								double prob = leftBestK.get(0).score * rightBestK.get(0).score * binaryRule.getScore();
+								Trace trace = new Trace(prob, k, binaryRule, null);
+								trace.leftRank = 0;
+								trace.rightRank = 0;
+								maxHeap.add(trace);
 								}
+							}
 					}
 
 					Queue<Trace> bestK = new PriorityQueue<Trace>(K); // min heap
@@ -137,52 +134,43 @@ public class CKYParserK implements Parser{
 								maxHeap.add(trace2);
 							}
 						} 
-//						else if (trace.unaryRule != null){
-//							List<Trace> unaryBestK = score[i][j].get(trace.unaryRule.child);
-//							if (trace.leftRank < unaryBestK.size() - 1){
-//								double prob = unaryBestK.get(trace.leftRank + 1).score * trace.unaryRule.score;
-//								Trace trace3 = new Trace(prob, 0, null, trace.unaryRule);
-//								trace3.leftRank++;
-//								maxHeap.add(trace3);
-//							}
-//						}
 					}
-					
-					// set score by unary rule
 					if (!bestK.isEmpty()){
-					  Set<Trace> hashSet = new HashSet<Trace>(bestK);
-						Queue<Trace> bestK2 = new PriorityQueue<Trace>(hashSet);
-						List<UnaryRule> unaryRules = uc.getClosedUnaryRulesByChild(parent);
-						for (UnaryRule unaryRule : unaryRules){
-							Iterator<Trace> iter = bestK.iterator();
-							while (iter.hasNext()){
-								Trace trace = iter.next();								
-								double prob = trace.score * unaryRule.score;
-								Trace trace3 = new Trace(prob, 0, null, unaryRule);
-								if (!hashSet.contains(trace3)){
-								  hashSet.contains(trace3);
-								  bestK2.add(trace3);
-  								if (bestK2.size() > K){
-  									bestK2.poll();
-  								}
-								}
-	//								List<Trace> bestK = score[i][j].get(parent);
-	//								if (bestK != null){
-	//									double prob = bestK.get(0).score;
-	//									prob *= unaryRule.getScore();
-	//									Trace trace = new Trace(prob, 0, null, unaryRule);
-	//									trace.leftRank = 0;
-	//									maxHeap.add(trace);
-	//								}
-						}
+            List<Trace> bestList = new LinkedList<Trace>();
+            while (!bestK.isEmpty()){
+              bestList.add(0, bestK.poll());
+            }
+            score[i][j].put(parent, bestList);
 					}
 
-					List<Trace> bestList = new LinkedList<Trace>();
-					while (!bestK2.isEmpty()){
-						bestList.add(0, bestK2.poll());
+					
+					// set score by unary rule
+  					if (!bestK.isEmpty()){
+  						List<UnaryRule> unaryRules = uc.getClosedUnaryRulesByChild(parent);
+  						for (UnaryRule unaryRule : unaryRules){
+  							Iterator<Trace> iter = bestK.iterator();
+                List<Trace> unaryParentList = score[i][j].get(unaryRule.parent);
+                Set<Trace> hashSet = new HashSet<Trace>(unaryParentList);
+                Queue<Trace> unaryParentMinHeap = new PriorityQueue<Trace>(hashSet);
+  							while (iter.hasNext()){
+  								Trace trace = iter.next();			
+  								double prob = trace.score * unaryRule.score;
+  								Trace trace3 = new Trace(prob, 0, null, unaryRule);
+  								if (!hashSet.contains(trace3)){
+  								  hashSet.add(trace3);
+                    unaryParentMinHeap.add(trace3);
+                    if (unaryParentMinHeap.size() > K){
+                      unaryParentMinHeap.poll();
+                    }
+  								}
+  						}
+  						unaryParentList = new LinkedList<Trace>();
+  						while (!unaryParentMinHeap.isEmpty()){
+  						  unaryParentList.add(0, unaryParentMinHeap.poll());
+  						}
+  						score[i][j].put(unaryRule.parent, unaryParentList);
+  					}
 					}
-					score[i][j].put(parent, bestList);
-			      }
 				}
 			}
 		}

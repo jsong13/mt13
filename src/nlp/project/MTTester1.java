@@ -169,31 +169,31 @@ public class MTTester1 {
       System.out.println("cannot translate");
      }
      references.add(gold);
-     System.out.println("BLEU before language model rescoring:");
+     System.out.println("  BLEU before language model rescoring:");
      for (int i = 0; i < numGramBleu; i++){
        double bleuScore = Evaluator.bleu(Collections.singletonList(candidates.get(0)), references, i+1);
        sumOfBleu[i] += bleuScore;
-       System.out.print("BLEU" + (i+1) + " : " + bleuScore);
+       System.out.print(" BLEU" + (i+1) + " : " + bleuScore);
      }
      System.out.println();
      while (heap.hasNext()){
        LMguessList.add(heap.next());
      }
-     System.out.println("BLEU after language model rescoring:");
+     System.out.println(" BLEU after language model rescoring:");
      for (int i = 0; i < numGramBleu; i++){
        double bleuScore = Evaluator.bleu(Collections.singletonList(LMguessList.get(0)), references, i+1);
        sumOfBleuLM[i] += bleuScore;
-       System.out.print("BLEU" + (i+1) + " : " + bleuScore);
+       System.out.print(" BLEU" + (i+1) + " : " + bleuScore);
      }
      System.out.println();
     }
     System.out.println("BLEU before language model rescoring:");
     for (int i = 0; i < numGramBleu; i++){
-      System.out.println("BLEU" + (i+1) + " : " + sumOfBleu[i]/sentenceNo);
+      System.out.println("  BLEU" + (i+1) + " : " + sumOfBleu[i]/sentenceNo);
     }
     System.out.println("BLEU after language model rescoring:");
     for (int i = 0; i < numGramBleu; i++){
-      System.out.println("BLEU" + (i+1) + " : " + sumOfBleuLM[i]/sentenceNo);
+      System.out.println("  BLEU" + (i+1) + " : " + sumOfBleuLM[i]/sentenceNo);
     }
 
 
