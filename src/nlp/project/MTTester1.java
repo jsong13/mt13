@@ -3,8 +3,11 @@ package nlp.project;
 
 import java.io.*;
 import java.util.*;
+import java.util.PriorityQueue;
+
 import nlp.project.*;
 import nlp.util.*;
+import nlp.langmodel.*;
 import nlp.ling.Tree;
 
 public class MTTester1 {
@@ -76,6 +79,7 @@ public class MTTester1 {
 
     List<Tree<SyncNode<String>>> trainSyncTrees = new ArrayList<Tree<SyncNode<String>>>();
     List<Tree<String>> trainTrees = new ArrayList<Tree<String>>();
+    List<List<String>> trainingCollectionForLM = new ArrayList<List<String>>();
 
     SyncGrammar<String> syncGrammar = new SyncGrammar();
     for (SentencePair<Integer> a1 : sp) {
@@ -91,6 +95,7 @@ public class MTTester1 {
       trainSyncTrees.add(syncTree);
 
       trainTrees.add(SyncGrammar.getSrcTree(syncTree, "NT-"));
+      trainingCollectionForLM.add(SyncGrammar.getTrgYield(syncTree));
 
       syncGrammar.increment(syncTree);
 
@@ -106,6 +111,9 @@ public class MTTester1 {
     System.out.println("dump syncGrammar below");
     System.out.println(syncGrammar.s2t);
 
+    LanguageModel languageModel = new EmpiricalTrigramLanguageModel(trainingCollectionForLM);
+    System.out.println("Language model training is done.");
+
 
     // train CKY Parser
     CKYParserK parser = new CKYParserK(trainTrees);
@@ -117,10 +125,15 @@ public class MTTester1 {
 
 
     // test on orginal trained set where source trees are available
-    List<List<String>> candidates = new ArrayList<List<String>>();
-    List<List<String>> references = new ArrayList<List<String>>();
     sentenceNo = 0;
+    int numGramBleu = 4;
+    double[] sumOfBleu = new double[numGramBleu];
+    double[] sumOfBleuLM = new double [numGramBleu];
+
     for (Tree<SyncNode<String>> syncTree : trainSyncTrees) {
+      List<List<String>> candidates = new ArrayList<List<String>>();
+      List<List<String>> references = new ArrayList<List<String>>();
+
       sentenceNo++;
       if (sentenceNo >= testNo) continue;
       //if (sentenceNo < 352) continue;
@@ -135,25 +148,54 @@ public class MTTester1 {
       System.out.println(joinList(gold));
 
       List<String> guess = null;
-      Tree<String> guessedTree = null;
+      List<Tree<String>> guessedTrees = null;
+      List<List<String>> LMguessList = new ArrayList<List<String>>();
+      FastPriorityQueue<List<String>> heap = new FastPriorityQueue<List<String>>(candidates.size());
      try{
-      guessedTree = parser.getBestParse(srcSentence);
-      guess = syncGrammar.translateFromSrcTree(guessedTree);
-      System.out.println(joinList(guess));
+      guessedTrees = parser.getBestParseK(srcSentence, 5);
+      for (Tree<String> guessedTree : guessedTrees){
+          guess = syncGrammar.translateFromSrcTree(guessedTree);
+          candidates.add(guess);
+          double prob = languageModel.getSentenceProbability(guess);
+          heap.setPriority(guess, prob);
+          System.out.println(joinList(guess));
+          System.out.println(prob);
+//          System.out.println(indentTree(srcTree));
+//          System.out.println(indentTree(guessedTree));
 
-      candidates.add(guess);
-      references.add(gold);
+      }
      }catch(IllegalArgumentException e){
       System.out.println(indentTree(srcTree));
-      System.out.println(indentTree(guessedTree));
       System.out.println("cannot translate");
      }
+     references.add(gold);
+     System.out.println("BLEU before language model rescoring:");
+     for (int i = 0; i < numGramBleu; i++){
+       double bleuScore = Evaluator.bleu(Collections.singletonList(candidates.get(0)), references, i+1);
+       sumOfBleu[i] += bleuScore;
+       System.out.print("BLEU" + (i+1) + " : " + bleuScore);
+     }
+     System.out.println();
+     while (heap.hasNext()){
+       LMguessList.add(heap.next());
+     }
+     System.out.println("BLEU after language model rescoring:");
+     for (int i = 0; i < numGramBleu; i++){
+       double bleuScore = Evaluator.bleu(Collections.singletonList(LMguessList.get(0)), references, i+1);
+       sumOfBleuLM[i] += bleuScore;
+       System.out.print("BLEU" + (i+1) + " : " + bleuScore);
+     }
+     System.out.println();
+    }
+    System.out.println("BLEU before language model rescoring:");
+    for (int i = 0; i < numGramBleu; i++){
+      System.out.println("BLEU" + (i+1) + " : " + sumOfBleu[i]/sentenceNo);
+    }
+    System.out.println("BLEU after language model rescoring:");
+    for (int i = 0; i < numGramBleu; i++){
+      System.out.println("BLEU" + (i+1) + " : " + sumOfBleuLM[i]/sentenceNo);
     }
 
-    System.out.println("BLEU 1: "+ Evaluator.bleu(candidates, references, 1));
-    System.out.println("BLEU 2: "+ Evaluator.bleu(candidates, references, 2));
-    System.out.println("BLEU 3: "+ Evaluator.bleu(candidates, references, 3));
-    System.out.println("BLEU 4: "+ Evaluator.bleu(candidates, references, 4));
 
     return;
   }

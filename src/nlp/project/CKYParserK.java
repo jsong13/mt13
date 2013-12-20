@@ -3,6 +3,7 @@ package nlp.project;
 import java.util.ArrayList; 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import java.util.TreeMap;
 
 import nlp.project.PCFGParserTester.BinaryRule;
@@ -28,7 +30,7 @@ import nlp.util.Indexer;
 public class CKYParserK implements Parser{
 	static final String root = "NT-";
 	static int rootIndex;
-	static final int K = 5;
+//	static final int K = 5;
 	static int sumTop = 0;
 	
 	public void insert(List<Trace> list, Trace trace){
@@ -48,13 +50,13 @@ public class CKYParserK implements Parser{
   CounterMap<String, String> tempLexicon;
   	@Override
   	public Tree<String> getBestParse(List<String> sentence){
-  		List<Tree<String>> bestParseK = getBestParseK(sentence);
+  		List<Tree<String>> bestParseK = getBestParseK(sentence, 1);
 //  		return bestParseK.get(bestParseK.size() - 1);
   		return bestParseK.get(0);
   	}
   	
 	@SuppressWarnings("unchecked")
-	public List<Tree<String>> getBestParseK(List<String> sentence) {
+	public List<Tree<String>> getBestParseK(List<String> sentence, int K) {
 		int sizeOfWords = sentence.size();
 		int sizeOfNonTer = indexer.size();
 		Map<String, List<Trace>>[][] score= new HashMap[sizeOfWords+1][sizeOfWords+1];
@@ -148,7 +150,8 @@ public class CKYParserK implements Parser{
 					
 					// set score by unary rule
 					if (!bestK.isEmpty()){
-						Queue<Trace> bestK2 = new PriorityQueue<Trace>(bestK);
+					  Set<Trace> hashSet = new HashSet<Trace>(bestK);
+						Queue<Trace> bestK2 = new PriorityQueue<Trace>(hashSet);
 						List<UnaryRule> unaryRules = uc.getClosedUnaryRulesByChild(parent);
 						for (UnaryRule unaryRule : unaryRules){
 							Iterator<Trace> iter = bestK.iterator();
@@ -156,9 +159,12 @@ public class CKYParserK implements Parser{
 								Trace trace = iter.next();								
 								double prob = trace.score * unaryRule.score;
 								Trace trace3 = new Trace(prob, 0, null, unaryRule);
-								bestK2.add(trace3);
-								if (bestK2.size() > K){
-									bestK2.poll();
+								if (!hashSet.contains(trace3)){
+								  hashSet.contains(trace3);
+								  bestK2.add(trace3);
+  								if (bestK2.size() > K){
+  									bestK2.poll();
+  								}
 								}
 	//								List<Trace> bestK = score[i][j].get(parent);
 	//								if (bestK != null){

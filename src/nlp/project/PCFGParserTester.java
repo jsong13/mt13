@@ -788,14 +788,14 @@ public class PCFGParserTester {
     eval.display(true);
   }
   
-  private static void testParserK(CKYParserK parser, List<Tree<String>> testTrees, boolean verbose) {
+  private static void testParserK(CKYParserK parser, List<Tree<String>> testTrees, boolean verbose, int K) {
 		int notPossibleParse = 0;
 		long startTime = 0, endTime = 0;
     EnglishPennTreebankParseEvaluator.LabeledConstituentEval<String> eval = new EnglishPennTreebankParseEvaluator.LabeledConstituentEval<String>(Collections.singleton("ROOT"), new HashSet<String>(Arrays.asList(new String[]{"''", "``", ".", ":", ","})));
     for (Tree<String> testTree : testTrees) {
       startTime = System.currentTimeMillis();
       List<String> testSentence = testTree.getYield();
-      List<Tree<String>> guessedTrees = parser.getBestParseK(testSentence);
+      List<Tree<String>> guessedTrees = parser.getBestParseK(testSentence, K);
       endTime = System.currentTimeMillis();
       for (Tree<String> guessedTree : guessedTrees){
           if (guessedTree.isLeaf()){

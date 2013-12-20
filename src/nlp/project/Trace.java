@@ -16,6 +16,7 @@ public class Trace implements Comparable<Trace> {
 		this.score = score;
 	}
 	
+	@Override
 	public int compareTo(Trace der){
 		if (this != der){
 			if (score > der.score){
@@ -28,6 +29,39 @@ public class Trace implements Comparable<Trace> {
 		}
 		return 0;
 	}
+	
+	@Override 
+	public boolean equals(Object obj){
+	  if (obj == this) return true;
+	  if (obj == null) return false;
+	  if (! (obj instanceof Trace)) return false;
+	  Trace other = (Trace)obj;
+	  if (this.binaryRule != null && !this.binaryRule.equals(other.binaryRule)){
+	    return false;
+	  }
+	  if (this.unaryRule != null && !this.unaryRule.equals(other.unaryRule)){
+	    return false;
+	  }
+	  return this.score == other.score && this.split == other.split
+	      && this.leftRank == other.leftRank && this.rightRank == other.rightRank;
+	}
+	
+	@Override
+	public int hashCode(){
+	  int hash = 7;
+	  if (binaryRule != null){
+	    hash = hash * 31 + binaryRule.hashCode();
+	  }
+	  if (unaryRule != null){
+	    hash = hash * 31 + unaryRule.hashCode();
+	  }
+    hash = hash * 31 + split;
+    hash = hash * 31 + leftRank;
+    hash = hash *31 + rightRank;
+	  return hash * 31 + Double.valueOf(score).hashCode();
+	  
+	}
+	
 	
 	Trace(double score, int split, BinaryRule binaryRule, UnaryRule unaryRule){
 		this.score = score;
@@ -45,7 +79,6 @@ public class Trace implements Comparable<Trace> {
 		} else {
 			return "score: " + score + " split: " + split;
 		}
-
 	}
 
 }
