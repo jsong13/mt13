@@ -16,7 +16,7 @@ class SyncNode<T>{
   T name = null;
   
   // for dump
-  static final String NT = "NT-";
+  public static final String NT = "NT-";
   final T dummy = (T)new Object();
 
   // represent a rule of synchronus grammar: T -> e1e2 A B e3 C, f1 B f2 C A
