@@ -178,6 +178,9 @@ public class CKYParserK implements Parser{
 		List<Tree<String>> annotatedBestParseK = new ArrayList<Tree<String>>();
 		List<Trace> bestK = score[0][sizeOfWords].get(root);
 		int topK = K;
+		if  (bestK == null){
+		  return annotatedBestParseK;
+		}
 		if (K > bestK.size()){
 			topK = bestK.size();
 		} 

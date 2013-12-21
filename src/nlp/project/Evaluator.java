@@ -40,7 +40,7 @@ public class Evaluator {
 			r += closestRefLength;
 		}
 		double brevityPenalty = 0.0;
-		if (c > r){
+		if (c >= r){
 			brevityPenalty = 1.0;
 		} else {
 			brevityPenalty = Math.exp(1-r/c);

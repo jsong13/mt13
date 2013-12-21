@@ -21,7 +21,7 @@ import nlp.util.CounterMap;
 import nlp.util.Indexer;
 
 public class CKYParser2 implements Parser {
-	static final String root = "S";
+	static final String root = "NT-";
 	static int rootIndex;
 
   CounterMap<List<String>, Tree<String>> knownParses;
